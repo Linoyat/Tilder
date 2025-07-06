@@ -5,10 +5,10 @@ import '../styles/BottomNav.css';
 function BottomNav({ active }) {
     return (
         <div className="bottom-nav">
-            <button onClick={() => window.location.href = '/match'} className={`nav-btn ${active === 'match' ? 'active' : ''}`}>
+            <button onClick={() => window.location.href = '/favorite'} className={`nav-btn ${active === 'match' ? 'active' : ''}`}>
                 <span role="img" aria-label="match">❤️</span>
             </button>
-            <button onClick={() => window.location.href = '/chat/1'} className={`nav-btn ${active === 'chat' ? 'active' : ''}`}>
+            <button onClick={() => window.location.href = '/chats'} className={`nav-btn ${active === 'chat' || active === 'chats' ? 'active' : ''}`}>
                 <span role="img" aria-label="chat">💬</span>
             </button>
             <button onClick={() => window.location.href = '/profile'} className={`nav-btn ${active === 'profile' ? 'active' : ''}`}>

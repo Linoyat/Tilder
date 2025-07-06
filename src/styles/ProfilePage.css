@@ -107,4 +107,122 @@ body {
 
 .settings-btn:hover {
   background-color: #e4e6eb;
+}
+
+.profile-bio-edit {
+  width: 100%;
+  min-height: 120px;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: 'Heebo', sans-serif;
+  font-size: 16px;
+  line-height: 1.7;
+  resize: vertical;
+  margin-bottom: 20px;
+}
+
+.profile-image-edit {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: 'Heebo', sans-serif;
+  font-size: 14px;
+  margin-bottom: 20px;
+  direction: ltr;
+  text-align: left;
+}
+
+.save-btn, .cancel-btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 10px;
+  border: none;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.save-btn {
+  background: linear-gradient(to right, #86efac, #3b82f6);
+  color: white;
+}
+
+.save-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px rgba(134, 239, 172, 0.4);
+}
+
+.cancel-btn {
+  background-color: #f87171;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #ef4444;
+}
+
+.profile-age-edit {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  font-family: 'Heebo', sans-serif;
+  font-size: 16px;
+  margin-bottom: 20px;
+  direction: ltr;
+  text-align: left;
+}
+
+.preference-options {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.preference-option {
+  display: flex;
+  align-items: center;
+  padding: 12px;
+  border: 2px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  background: #f9fafb;
+}
+
+.preference-option:hover {
+  border-color: #f9a8d4;
+  background: #fdf2f8;
+}
+
+.preference-option input[type="radio"] {
+  margin-left: 12px;
+  width: 18px;
+  height: 18px;
+  accent-color: #f9a8d4;
+}
+
+.preference-option span {
+  font-size: 16px;
+  font-weight: 500;
+  color: #374151;
+}
+
+.preference-option input[type="radio"]:checked + span {
+  color: #f9a8d4;
+  font-weight: 700;
+}
+
+.profile-preference {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #6b7280;
+  background: #f3f4f6;
+  padding: 12px;
+  border-radius: 8px;
+  border-right: 4px solid #f9a8d4;
 } 
