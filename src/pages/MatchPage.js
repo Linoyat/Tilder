@@ -2,7 +2,9 @@ import React, { useEffect, useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import shelters from '../data/shelters.js'; // ייבוא המקלטים
+import useShelters from '../data/useShelters'; // או ../hooks/useShelters אם שמרת שם
+import { useNavigate } from 'react-router-dom';
+import BottomNav from '../components/BottomNav';
 
 // Fix for default icon not showing in React-Leaflet
 delete L.Icon.Default.prototype._getIconUrl;
@@ -21,10 +23,23 @@ const shelterIcon = new L.DivIcon({
   popupAnchor: [0, -24]
 });
 
+const dummyShelter = {
+  id: 'dummy1',
+  name: 'מקלט דיזנגוף 100',
+  address: 'דיזנגוף 100, תל אביב',
+  lat: 32.0805,
+  lng: 34.7748,
+};
+
 function MatchPage() {
-  const [location, setLocation] = useState(null);     // מיקום המשתמש
-  const [error, setError] = useState(null);            // הודעת שגיאה אם קיימת
-  const [loading, setLoading] = useState(true);        // בודק אם עדיין טוען
+  const [location, setLocation] = useState(null);
+  const [error, setError] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const { shelters, loading: sheltersLoading, error: sheltersError } = useShelters();
+  const navigate = useNavigate();
+
+  // הוסף את המקלט הדמי לכל המקלטים
+  const allShelters = [...shelters, dummyShelter];
 
   useEffect(() => {
     if ("geolocation" in navigator) {
@@ -37,46 +52,51 @@ function MatchPage() {
           setLoading(false);
         },
         (err) => {
-          setError("לא ניתן לקבל מיקום: " + err.message);
+          console.warn("שגיאה באיתור מיקום:", err.message);
+          setError("לא הצלחנו לאתר את מיקומך – מוצגת מפה כללית");
+          setLocation({ lat: 32.0853, lng: 34.7818 }); // תל אביב כ fallback
           setLoading(false);
         }
       );
     } else {
       setError("המכשיר שלך לא תומך בגישה למיקום");
+      setLocation({ lat: 32.0853, lng: 34.7818 }); // ברירת מחדל
       setLoading(false);
     }
   }, []);
 
   return (
-    <div style={{ height: '100vh' }}>
+    <div>
       {loading && <p>טוען מיקום...</p>}
-      {error && <p style={{ color: 'red' }}>{error}</p>}
+      {error && <p style={{ color: 'red', textAlign: 'center' }}>{error}</p>}
 
       {location && (
-        <MapContainer center={[location.lat, location.lng]} zoom={13} style={{ height: "100vh", width: "100%" }}>
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; OpenStreetMap contributors'
-        />
-        <Marker position={[location.lat, location.lng]}>
-          <Popup>את פה! 🎉</Popup>
-        </Marker>
-
-        {/* Display shelter markers */}
-        {shelters.map(shelter => (
-          <Marker key={shelter.id} position={[shelter.lat, shelter.lng]} icon={shelterIcon}>
-            <Popup>
-              <strong>{shelter.name}</strong><br />
-              {shelter.address}
-              <br />
-              <button style={{marginTop: '5px'}}>בחר/י מקלט</button>
-            </Popup>
+        <MapContainer
+          center={[location.lat, location.lng]}
+          zoom={13}
+          style={{ height: "calc(100vh - 60px)", width: "100%" }}
+        >
+          <TileLayer
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution='&copy; OpenStreetMap contributors'
+          />
+          <Marker position={[location.lat, location.lng]}>
+            <Popup>את כאן 🎯</Popup>
           </Marker>
-        ))}
 
-      </MapContainer>
-      
-      
+          {/* סימון מקלטים */}
+          {allShelters.map((shelter) => (
+            <Marker key={shelter.id} position={[shelter.lat, shelter.lng]} icon={shelterIcon}>
+              <Popup>
+                <strong>{shelter.name}</strong><br />
+                {shelter.address}
+                <br />
+                <button style={{ marginTop: '5px' }} onClick={() => navigate(`/shelter/${shelter.id}`)}>בחר/י מקלט</button>
+              </Popup>
+            </Marker>
+          ))}
+
+        </MapContainer>
       )}
     </div>
   );

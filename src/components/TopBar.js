@@ -11,9 +11,10 @@ function TopBar() {
 
   return (
     <div className="top-bar">
-      <div className="top-bar__left">
-        <div className="top-bar__logo">טילדר</div>
-      </div>
+      <div className="top-bar__logo" onClick={() => window.location.href = '/match'} style={{ cursor: 'pointer' }}>
+       טילדר
+    </div>
+
       <div className="top-bar__center">
         {user && <span className="top-bar__greeting">ברוכים הבאים, {user.fullName}</span>}
       </div>
@@ -21,9 +22,7 @@ function TopBar() {
         <button className="notification-btn" title="התראות">
           <span role="img" aria-label="notifications">🔔</span>
         </button>
-        <button className="profile-btn-topbar" title="אזור אישי" onClick={() => window.location.href = '/profile'}>
-          <span role="img" aria-label="profile">👤</span>
-        </button>
+
         {user && (
           <button className="logout-btn" onClick={handleLogout} title="התנתקות">
             <span role="img" aria-label="logout">🚪</span>
