@@ -1,3 +1,27 @@
+# Tilder - Development Setup
+
+## Server environment variables
+
+Create a file named `.env` inside the `server/` directory with the following content:
+
+```
+MONGO_URI=your-mongodb-connection-string
+```
+
+Then install dependencies and start both server and client:
+
+```bash
+# terminal 1
+cd server
+npm install
+npm start
+
+# terminal 2
+cd ..
+npm install
+npm start
+```
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).

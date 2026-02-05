@@ -1,20 +1,20 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
 
 function ChatsPage() {
     const [chats, setChats] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [shelterId, setShelterId] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchChats = async () => {
-            const token = localStorage.getItem('token');
-            if (!token) {
-                navigate('/login');
-                return;
-            }
+        const token = localStorage.getItem('token');
+        if (!token) {
+            navigate('/login');
+            return;
+        }
 
+        const fetchChats = async () => {
             try {
                 const response = await fetch('http://localhost:5050/api/chats', {
                     headers: {
@@ -37,7 +37,22 @@ function ChatsPage() {
             }
         };
 
+        const fetchProfile = async () => {
+            try {
+                const res = await fetch('http://localhost:5050/api/profile', {
+                    headers: { 'x-auth-token': token },
+                });
+                if (res.ok) {
+                    const data = await res.json();
+                    if (data.shelterId) setShelterId(data.shelterId);
+                }
+            } catch (e) {
+                console.warn('Error fetching profile for shelterId', e);
+            }
+        };
+
         fetchChats();
+        fetchProfile();
     }, [navigate]);
 
     const handleChatClick = (chat) => {
@@ -117,7 +132,6 @@ function ChatsPage() {
         return (
             <div style={{textAlign: 'center', marginTop: 40}}>
                 טוען צ'אטים...
-                <BottomNav active="chat" />
             </div>
         );
     }
@@ -143,6 +157,24 @@ function ChatsPage() {
                 top: 0,
                 zIndex: 10
             }}>
+                {shelterId && (
+                    <button
+                        onClick={() => navigate(`/shelter/${shelterId}`)}
+                        title="חזרה למקלט"
+                        style={{
+                            position: 'absolute',
+                            right: 16,
+                            background: 'none',
+                            border: 'none',
+                            fontSize: 24,
+                            cursor: 'pointer',
+                            padding: 4,
+                            lineHeight: 1,
+                        }}
+                    >
+                        ←
+                    </button>
+                )}
                 <h2 style={{margin: 0}}>צ'אטים</h2>
             </div>
 
@@ -238,8 +270,6 @@ function ChatsPage() {
                     </div>
                 )}
             </div>
-
-            <BottomNav active="chat" />
         </div>
     );
 }

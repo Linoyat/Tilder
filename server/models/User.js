@@ -5,7 +5,7 @@ const userSchema = new mongoose.Schema({
   email:     { type: String, required: true, unique: true },
   password:  { type: String, required: true },
   bio:       { type: String, default: 'אין עדיין ביו' },
-  profileImage: { type: String, default: 'https://tse4.mm.bing.net/th?id=OIP.XYhLdebJ7-qrS0AQbQZklwHaE8&pid=Api' },
+  profileImage: { type: String, default: 'https://ui-avatars.com/api/?name=User&size=300&background=667eea&color=fff&bold=true' },
   shelterId: { type: String, default: null },
   preference: { type: String, enum: ['women', 'men', 'both'], default: 'both' }, // העדפה: נשים, גברים, או שניהם
   favorites: { type: [String], default: [] },

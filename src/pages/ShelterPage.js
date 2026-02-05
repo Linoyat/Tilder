@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import BottomNav from '../components/BottomNav';
 
 const dummyShelter = {
   id: 'dummy1',
@@ -37,40 +36,131 @@ function ShelterPage() {
   const [likedUsers, setLikedUsers] = useState(new Set());
   const [loading, setLoading] = useState(true);
   const [userPreference, setUserPreference] = useState('both');
+  const [peopleCount, setPeopleCount] = useState(0);
+  const [isInShelter, setIsInShelter] = useState(false);
+  const [shelterInfo, setShelterInfo] = useState(null); // מידע על המקלט מהשרת / דמו
   const navigate = useNavigate();
 
-  // טעינת מועדפים מהשרת
+  // טעינת מועדפים ומידע על המקלט מהשרת
   useEffect(() => {
     const fetchUserData = async () => {
       const token = localStorage.getItem('token');
+      
+      // למקלט דמי, נגדיר כניסה אוטומטית גם בלי token
+      if (id === 'dummy1') {
+        setIsInShelter(true);
+        setPeopleCount(dummyUsers.length);
+        setShelterInfo(dummyShelter);
+        setLoading(false);
+        return;
+      }
+      
       if (!token) {
         setLoading(false);
         return;
       }
 
       try {
-        // טעינת מועדפים
-        const favoritesResponse = await fetch('http://localhost:5050/api/favorites', {
-          headers: {
-            'x-auth-token': token,
-          },
-        });
+        // טעינת פרטי המקלט (שם וכתובת) – תמיד למקלטים אמיתיים
+        try {
+          const shelterRes = await fetch(`http://localhost:5050/api/shelters/${id}`);
+          if (shelterRes.ok) {
+            const data = await shelterRes.json();
+            setShelterInfo({
+              name: data.name || '',
+              address: data.address || '',
+            });
+          }
+        } catch (err) {
+          console.warn('Error fetching shelter details:', err);
+        }
 
-        if (favoritesResponse.ok) {
-          const favorites = await favoritesResponse.json();
-          setLikedUsers(new Set(favorites));
+        // טעינת מועדפים
+        try {
+          const favoritesResponse = await fetch('http://localhost:5050/api/favorites', {
+            headers: {
+              'x-auth-token': token,
+            },
+          });
+
+          if (favoritesResponse.ok) {
+            const favorites = await favoritesResponse.json();
+            setLikedUsers(new Set(favorites));
+          }
+        } catch (err) {
+          console.warn('Error fetching favorites:', err);
         }
 
         // טעינת העדפות המשתמש
-        const profileResponse = await fetch('http://localhost:5050/api/profile', {
-          headers: {
-            'x-auth-token': token,
-          },
-        });
+        let userShelterId = null;
+        try {
+          const profileResponse = await fetch('http://localhost:5050/api/profile', {
+            headers: {
+              'x-auth-token': token,
+            },
+          });
 
-        if (profileResponse.ok) {
-          const userData = await profileResponse.json();
-          setUserPreference(userData.preference || 'both');
+          if (profileResponse.ok) {
+            const userData = await profileResponse.json();
+            setUserPreference(userData.preference || 'both');
+            userShelterId = userData.shelterId;
+            setIsInShelter(userData.shelterId === id);
+          }
+        } catch (err) {
+          console.warn('Error fetching profile:', err);
+        }
+
+        // כניסה אוטומטית למקלט
+        // אם המשתמש במקלט אחר, השרת יוציא אותו אוטומטית מהמקלט הקודם
+        if (userShelterId !== id) {
+          try {
+            const enterResponse = await fetch(`http://localhost:5050/api/shelters/${id}/enter`, {
+              method: 'POST',
+              headers: {
+                'x-auth-token': token,
+              },
+            });
+
+            if (enterResponse.ok) {
+              const enterData = await enterResponse.json();
+              setIsInShelter(true);
+              setPeopleCount(enterData.peopleCount);
+            }
+          } catch (err) {
+            console.warn('Error entering shelter automatically:', err);
+          }
+        } else if (userShelterId === id) {
+          // אם המשתמש כבר במקלט הזה, נטען את כמות האנשים
+          try {
+            const shelterResponse = await fetch(`http://localhost:5050/api/shelters/${id}`);
+            if (shelterResponse.ok) {
+              const shelterData = await shelterResponse.json();
+              setPeopleCount(shelterData.peopleCount || 0);
+              setShelterInfo({
+                name: shelterData.name || '',
+                address: shelterData.address || '',
+              });
+            }
+          } catch (err) {
+            console.warn('Error fetching shelter:', err);
+          }
+        }
+
+        // אם המשתמש כבר במקלט, נטען את כמות האנשים
+        if (id !== 'dummy1' && userShelterId === id) {
+          try {
+            const shelterResponse = await fetch(`http://localhost:5050/api/shelters/${id}`);
+            if (shelterResponse.ok) {
+              const shelterData = await shelterResponse.json();
+              setPeopleCount(shelterData.peopleCount || 0);
+              setShelterInfo({
+                name: shelterData.name || '',
+                address: shelterData.address || '',
+              });
+            }
+          } catch (err) {
+            console.warn('Error fetching shelter:', err);
+          }
         }
       } catch (error) {
         console.error('Error fetching user data:', error);
@@ -80,11 +170,7 @@ function ShelterPage() {
     };
 
     fetchUserData();
-  }, []);
-
-  if (id !== 'dummy1') {
-    return <div style={{textAlign: 'center', marginTop: 40}}>אין נתונים למקלט זה.</div>;
-  }
+  }, [id]);
 
   // סינון משתמשים לפי העדפה
   const filteredUsers = dummyUsers.filter(user => {
@@ -143,20 +229,76 @@ function ShelterPage() {
     navigate(`/chat/${user.id}`, { 
       state: { 
         userName: user.name, 
-        userImage: user.image 
+        userImage: user.image,
+        fromShelterId: id,
       } 
     });
+  };
+
+  const handleLeaveShelter = async () => {
+    if (id === 'dummy1') {
+      setIsInShelter(false);
+      setPeopleCount(prev => Math.max(0, prev - 1));
+      return;
+    }
+
+    const token = localStorage.getItem('token');
+    if (!token) {
+      alert('עליך להתחבר כדי לצאת מהמקלט');
+      return;
+    }
+
+    try {
+      const response = await fetch(`http://localhost:5050/api/shelters/${id}/leave`, {
+        method: 'POST',
+        headers: {
+          'x-auth-token': token,
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setIsInShelter(false);
+        setPeopleCount(data.peopleCount);
+      } else {
+        alert('שגיאה ביציאה מהמקלט');
+      }
+    } catch (error) {
+      console.error('Error leaving shelter:', error);
+      alert('שגיאה ביציאה מהמקלט');
+    }
   };
 
   if (loading) {
     return <div style={{textAlign: 'center', marginTop: 40}}>טוען...</div>;
   }
 
+  const currentShelter =
+    id === 'dummy1'
+      ? dummyShelter
+      : shelterInfo || { name: 'מקלט', address: '' };
+
   return (
     <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px #0001', position: 'relative', minHeight: '80vh' }}>
-      <h2 style={{textAlign: 'center'}}>{dummyShelter.name}</h2>
-      <p style={{textAlign: 'center', color: '#666'}}>{dummyShelter.address}</p>
+      <h2 style={{textAlign: 'center', marginTop: 0}}>
+        ברוכים הבאים
+      </h2>
+      <p style={{textAlign: 'center', color: '#666'}}>{currentShelter.address}</p>
       
+      {/* כמות אנשים במקלט */}
+      <div style={{
+        background: '#e8f5e9',
+        padding: '12px',
+        borderRadius: '8px',
+        marginBottom: '16px',
+        textAlign: 'center',
+        fontSize: '16px',
+        fontWeight: 600,
+        color: '#2e7d32'
+      }}>
+        👥 {peopleCount} אנשים במקלט
+      </div>
+
       {/* הצגת העדפה נוכחית */}
       <div style={{
         background: '#f0f8ff',
@@ -241,7 +383,6 @@ function ShelterPage() {
           ))
         )}
       </div>
-      <BottomNav active="match" />
     </div>
   );
 }

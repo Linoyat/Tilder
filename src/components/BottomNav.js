@@ -5,8 +5,11 @@ import '../styles/BottomNav.css';
 function BottomNav({ active }) {
     return (
         <div className="bottom-nav">
-            <button onClick={() => window.location.href = '/favorite'} className={`nav-btn ${active === 'match' ? 'active' : ''}`}>
-                <span role="img" aria-label="match">❤️</span>
+            <button onClick={() => window.location.href = '/match'} className={`nav-btn ${active === 'match' || active === 'shelter' ? 'active' : ''}`}>
+                <span role="img" aria-label="map">🗺️</span>
+            </button>
+            <button onClick={() => window.location.href = '/favorite'} className={`nav-btn ${active === 'favorite' ? 'active' : ''}`}>
+                <span role="img" aria-label="favorite">❤️</span>
             </button>
             <button onClick={() => window.location.href = '/chats'} className={`nav-btn ${active === 'chat' || active === 'chats' ? 'active' : ''}`}>
                 <span role="img" aria-label="chat">💬</span>

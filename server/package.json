@@ -4,6 +4,8 @@
   "main": "index.js",
   "scripts": {
     "start": "nodemon server.js",
+    "fetch-shelters": "node scripts/fetchShelters.js",
+    "update-shelter-names": "node scripts/updateShelterNames.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -11,11 +13,14 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@google/genai": "^1.32.0",
     "bcryptjs": "^3.0.2",
     "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
     "express": "^5.1.0",
     "jsonwebtoken": "^9.0.2",
-    "mongoose": "^8.16.0"
+    "mongoose": "^8.16.0",
+    "node-fetch": "^2.7.0"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

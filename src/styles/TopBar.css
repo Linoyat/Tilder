@@ -15,6 +15,7 @@
 .top-bar__left, .top-bar__center, .top-bar__right {
     display: flex;
     align-items: center;
+    gap: 15px;
 }
 
 .top-bar__logo {
@@ -74,24 +75,25 @@
     color: #c084fc;
 }
 
-.logout-btn {
-    background: linear-gradient(90deg, #f9a8d4 0%, #c084fc 100%);
-    border: none;
-    font-size: 18px;
-    color: #fff;
+.top-bar__logout {
+    background: transparent;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    font-size: 20px;
+    width: 40px;
+    height: 40px;
     border-radius: 50%;
-    width: 120px;
-    height: 36px;
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: pointer;
-    box-shadow: 0 2px 8px rgba(192, 132, 252, 0.10);
-    margin-right: 0;
-    transition: background 0.2s, transform 0.2s;
+    transition: background 0.2s, border-color 0.2s;
 }
-.logout-btn:hover {
-    background: linear-gradient(90deg, #c084fc 0%, #f9a8d4 100%);
-    transform: scale(1.08);
+.top-bar__logout:hover {
+    background: #fdf2f8;
+    border-color: #f9a8d4;
+}
+.top-bar__logout:focus {
+    outline: 2px solid #c084fc;
+    outline-offset: 2px;
 }
   

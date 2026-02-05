@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import '../styles/HomePage.css';
-import BottomNav from '../components/BottomNav';
 
 // משתמשים דמיוניים (בעתיד יבואו מהשרת)
 const allUsers = [
@@ -28,16 +28,18 @@ function FavoritePage() {
   const [favorites, setFavorites] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [shelterId, setShelterId] = useState(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
-    const fetchFavorites = async () => {
-      const token = localStorage.getItem('token');
-      if (!token) {
-        setError('עליך להתחבר כדי לראות את המועדפים שלך');
-        setLoading(false);
-        return;
-      }
+    const token = localStorage.getItem('token');
+    if (!token) {
+      setError('עליך להתחבר כדי לראות את המועדפים שלך');
+      setLoading(false);
+      return;
+    }
 
+    const fetchFavorites = async () => {
       try {
         const response = await fetch('http://localhost:5050/api/favorites', {
           headers: {
@@ -47,7 +49,6 @@ function FavoritePage() {
 
         if (response.ok) {
           const favoriteIds = await response.json();
-          // מציג רק את המשתמשים שהם מועדפים
           const favoriteUsers = allUsers.filter(user => 
             favoriteIds.includes(user.id.toString())
           );
@@ -63,7 +64,22 @@ function FavoritePage() {
       }
     };
 
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch('http://localhost:5050/api/profile', {
+          headers: { 'x-auth-token': token },
+        });
+        if (res.ok) {
+          const data = await res.json();
+          if (data.shelterId) setShelterId(data.shelterId);
+        }
+      } catch (e) {
+        console.warn('Error fetching profile for shelterId', e);
+      }
+    };
+
     fetchFavorites();
+    fetchProfile();
   }, []);
 
   const handleRemoveFavorite = async (userId) => {
@@ -103,7 +119,6 @@ function FavoritePage() {
     return (
       <div style={{textAlign: 'center', marginTop: 40}}>
         טוען מועדפים...
-        <BottomNav active="favorite" />
       </div>
     );
   }
@@ -112,13 +127,30 @@ function FavoritePage() {
     return (
       <div style={{textAlign: 'center', marginTop: 40, color: 'red'}}>
         {error}
-        <BottomNav active="favorite" />
       </div>
     );
   }
 
   return (
     <div style={{ maxWidth: 500, margin: '40px auto', padding: 24, background: '#fff', borderRadius: 16, boxShadow: '0 2px 12px #0001', position: 'relative', minHeight: '80vh' }}>
+      {shelterId && (
+        <div style={{ marginBottom: 16 }}>
+          <button
+            onClick={() => navigate(`/shelter/${shelterId}`)}
+            title="חזרה למקלט"
+            style={{
+              background: 'none',
+              border: 'none',
+              fontSize: 28,
+              cursor: 'pointer',
+              padding: 4,
+              lineHeight: 1,
+            }}
+          >
+            ←
+          </button>
+        </div>
+      )}
       <h1 style={{textAlign: 'center', marginBottom: 24}}>המועדפים שלי</h1>
       
       {favorites.length === 0 ? (
@@ -165,7 +197,6 @@ function FavoritePage() {
           ))}
         </div>
       )}
-      <BottomNav active="favorite" />
     </div>
   );
 }
