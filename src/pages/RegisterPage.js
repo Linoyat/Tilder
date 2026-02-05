@@ -18,8 +18,8 @@ function RegisterPage() {
 
       const data = await response.json();
       if (response.ok) {
-        alert('נרשמת בהצלחה!');
-        window.location.href = "/match";
+        alert('נרשמת בהצלחה! אנא התחברי כדי להמשיך');
+        window.location.href = "/login";
       } else {
         alert(data.message || 'שגיאה בהרשמה');
       }

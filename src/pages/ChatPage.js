@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import '../styles/HomePage.css';
-import BottomNav from '../components/BottomNav';
 
 function ChatPage() {
     const { id } = useParams();
@@ -161,7 +160,6 @@ function ChatPage() {
         return (
             <div style={{textAlign: 'center', marginTop: 40}}>
                 טוען צ'אט...
-                <BottomNav active="chat" />
             </div>
         );
     }
@@ -187,7 +185,9 @@ function ChatPage() {
                 zIndex: 10
             }}>
                 <button 
-                    onClick={() => navigate('/chats')}
+                    onClick={() => location.state?.fromShelterId
+                        ? navigate(`/shelter/${location.state.fromShelterId}`)
+                        : navigate('/chats')}
                     style={{
                         background: 'none',
                         border: 'none',
@@ -195,6 +195,7 @@ function ChatPage() {
                         cursor: 'pointer',
                         marginInlineEnd: '12px'
                     }}
+                    title="חזרה לצ'אטים"
                 >
                     ←
                 </button>
@@ -328,8 +329,6 @@ function ChatPage() {
                     ➤
                 </button>
             </div>
-
-            <BottomNav active="chat" />
         </div>
     );
 }
